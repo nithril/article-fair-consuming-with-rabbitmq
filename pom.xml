@@ -13,6 +13,21 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>nithril</id>
+            <name>Nicolas Labrot</name>
+            <email>nithril@gmail.com</email>
+            <organizationUrl>https://github.com/nithril</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
 
