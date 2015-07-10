@@ -5,16 +5,13 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 
-/**
- * Created by nithril on 26/10/14.
- */
+
 public class DwrrMainLoop implements Runnable {
 
     public static final Logger LOG = LoggerFactory.getLogger(DwrrMainLoop.class);

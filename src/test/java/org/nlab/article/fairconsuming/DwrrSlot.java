@@ -1,8 +1,6 @@
 package org.nlab.article.fairconsuming;
 
-/**
- * Created by nlabrot on 05/07/15.
- */
+
 public class DwrrSlot {
 
     private final int quantum;

@@ -14,9 +14,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
 
-/**
- * Created by nlabrot on 05/07/15.
- */
+
 public class DwrrBlockingQueueConsumer {
 
     public static final Logger LOG = LoggerFactory.getLogger(DwrrBlockingQueueConsumer.class);
