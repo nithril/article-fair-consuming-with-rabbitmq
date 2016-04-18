@@ -37,37 +37,43 @@ public class DwrrMainLoop implements Runnable {
         try {
 
             while (!stopProcessing) {
-                int processedMessageCounter = 0;
+
 
                 //Try to acquire a consumer token, wait for 5 seconds
                 if (consumerToken.tryAcquire(1, 5, TimeUnit.SECONDS)) {
-                    //We got a token, a delivery is available
-                    for (DwrrSlot slot : slots) {
-                        //The deficit is reduced per iteration
-                        slot.reduceDeficit();
+                    int processedMessageCounter = 0;
+                    try {
 
-                        //Loop until the slot does not contain any deliveries or until the slot deficit is bellow the message weight
-                        while (!slot.getConsumer().getDeliveries().isEmpty() && slot.getDeficit() >= MESSAGE_WEIGHT) {
-                            QueueingConsumer.Delivery delivery = slot.getConsumer().getDeliveries().poll();
-                            slot.increaseDeficit(MESSAGE_WEIGHT);
-                            //Consume
-                            consumer.accept(delivery);
-                            //Finally ack the message, so RabbitMQ will push a new one to this slot
-                            slot.getConsumer().getChannel().basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                        //We got a token, a delivery is available
+                        for (DwrrSlot slot : slots) {
+                            //The deficit is reduced per iteration
+                            slot.reduceDeficit();
 
+                            //Loop until the slot does not contain any deliveries or until the slot deficit is bellow the message weight
+                            while (!slot.getConsumer().getDeliveries().isEmpty() && slot.getDeficit() >= MESSAGE_WEIGHT) {
+                                QueueingConsumer.Delivery delivery = slot.getConsumer().getDeliveries().poll();
+                                slot.increaseDeficit(MESSAGE_WEIGHT);
+                                //Consume
+                                consumer.accept(delivery);
+                                //Finally ack the message, so RabbitMQ will push a new one to this slot
+                                slot.getConsumer().getChannel().basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
+                                //Increment the number of processed message
+                                processedMessageCounter++;
+                            }
+                            //If the slot does not contain any deliveries, reset the deficit
+                            if (slot.getConsumer().getDeliveries().isEmpty()) {
+                                slot.reset();
+                            }
                         }
-                        //If the slot does not contain any deliveries, reset the deficit
-                        if (slot.getConsumer().getDeliveries().isEmpty()) {
-                            slot.reset();
+                    } finally {
+                        if (processedMessageCounter > 0) {
+                            //If we have processed message, we must acquire the number of processed message minus the first acquire
+                            consumerToken.acquire(processedMessageCounter - 1);
+                        } else {
+                            //If we do not have processed message (because all deficit where < weight) we must release the token
+                            consumerToken.release();
                         }
-                    }
-
-                    if (processedMessageCounter > 0) {
-                        //If we have processed message, we must acquire the number of processed message minus the first acquire
-                        consumerToken.acquire(processedMessageCounter - 1);
-                    } else {
-                        //If we do not have processed message (because all deficit where < weight) we must release the token
-                        consumerToken.release();
                     }
 
                 } else {
